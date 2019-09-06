@@ -5,6 +5,9 @@ import feedparser
 import re
 import urllib
 from bs4 import BeautifulSoup
+#from test.test import test
+
+RSS_URL = "https://www.head-fi.org/forums/headphones-for-sale-trade.6550/index.rss"
 
 def check_ship_australia_or_worldwide(details: Mapping[str, str]) -> bool:
     if "Anywhere" == details["Ship to"] or "Australia" == details["Ship to"]:
@@ -20,20 +23,19 @@ def parse_details(url: str) -> Mapping[str, str]:
     unparsed_info = list(soup.find_all(class_="pairsRows secondaryContent")[0].stripped_strings)
     return dict(zip([x.rstrip(':') for x in unparsed_info[::2]], unparsed_info[1::2]))
 
-rss_url = "https://www.head-fi.org/forums/headphones-for-sale-trade.6550/index.rss"
+def parse_feed() -> None:
+    feed = feedparser.parse(RSS_URL)
 
-feed = feedparser.parse(rss_url)
+    if feed["bozo"] == 1:
+        sys.exit("Malformed RSS feed! Exiting...")
 
-if feed["bozo"] == 1:
-    sys.exit("Malformed RSS feed! Exiting...")
+    id_regex = re.compile(".*\.(\d+)/$")
 
-id_regex = re.compile(".*\.(\d+)/$")
-
-for item in feed["items"]:
-    details = parse_details(item["link"])
-    if not check_ship_australia_or_worldwide(details):
-        continue
-    print("Type: {}".format(details["Type"]))
-    print("Title: {}".format(item["title"]))
-    print("ID: {}".format(id_regex.match(item["guid"]).group(1)))
-    print("Price: {} {}".format(details["Price"], details["Currency"]))
+    for item in feed["items"]:
+        details = parse_details(item["link"])
+        if not check_ship_australia_or_worldwide(details):
+            continue
+        print("Type: {}".format(details["Type"]))
+        print("Title: {}".format(item["title"]))
+        print("ID: {}".format(id_regex.match(item["guid"]).group(1)))
+        print("Price: {} {}".format(details["Price"], details["Currency"]))
