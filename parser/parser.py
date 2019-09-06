@@ -4,6 +4,7 @@ from typing import Mapping
 import feedparser
 import re
 import urllib
+import sys
 from bs4 import BeautifulSoup
 #from test.test import test
 
