@@ -16,7 +16,7 @@ def check_ship_australia_or_worldwide(details: Mapping[str, str]) -> bool:
     return False
 
 def parse_details(url: str) -> Mapping[str, str]:
-    page = urllib.request.urlopen(item["link"])
+    page = urllib.request.urlopen(url)
     soup = BeautifulSoup(page, "html.parser")
     # Returns stuff like: 
     # ['Type:', 'For Sale', 'Currency:', 'Euro', 'Price:', '750', 'Ship to:', 'Anywhere',
