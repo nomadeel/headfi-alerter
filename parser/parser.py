@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup
 RSS_URL = "https://www.head-fi.org/forums/headphones-for-sale-trade.6550/index.rss"
 
 def check_ship_australia_or_worldwide(details: Mapping[str, str]) -> bool:
+    if "Ship to" not in details:
+        return False
     if "Anywhere" == details["Ship to"] or "Australia" == details["Ship to"]:
         return True
     return False
