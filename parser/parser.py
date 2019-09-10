@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Mapping
+from typing import Mapping, List
 import feedparser
 import re
 import urllib
@@ -39,8 +39,9 @@ def parse_details(url: str) -> Mapping[str, str]:
     unparsed_info = list(soup.find_all(class_="pairsRows secondaryContent")[0].stripped_strings)
     return dict(zip([x.rstrip(':') for x in unparsed_info[::2]], unparsed_info[1::2]))
 
-def parse_feed() -> None:
+def parse_feed() -> List[Listing]:
     feed = feedparser.parse(RSS_URL)
+    listings = []
 
     if feed["bozo"] == 1:
         sys.exit("Malformed RSS feed! Exiting...")
@@ -51,7 +52,8 @@ def parse_feed() -> None:
         details = parse_details(item["link"])
         if not check_ship_australia_or_worldwide(details):
             continue
-        print("Type: {}".format(details["Type"]))
-        print("Title: {}".format(item["title"]))
-        print("ID: {}".format(id_regex.match(item["guid"]).group(1)))
-        print("Price: {} {}".format(details["Price"], details["Currency"]))
+        listing = Listing(item["title"], id_regex.match(item["guid"]).group(1),
+                          '{} {}'.format(details["Price"], details["Currency"]), item["link"])
+        listings.append(listing)
+
+    return listings
