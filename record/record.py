@@ -15,7 +15,7 @@ def create_database() -> sqlite3.Connection:
     conn.commit()
     return conn
 
-def connect() -> sqlite3.Connection:
+def connect_to_database() -> sqlite3.Connection:
     if not os.path.exists(DATABASE_FILE):
         return create_database()
     return sqlite3.connect(DATABASE_FILE)
