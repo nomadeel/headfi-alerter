@@ -5,7 +5,9 @@ import feedparser
 import re
 import urllib
 import sys
+import sqlite3
 from bs4 import BeautifulSoup
+from record.record import *
 #from test.test import test
 
 RSS_URL = "https://www.head-fi.org/forums/headphones-for-sale-trade.6550/index.rss"
@@ -25,10 +27,9 @@ class Listing:
                                                                              self.price, self.link,
                                                                              self.ships_to)
 
-def check_ship_australia_or_worldwide(details: Mapping[str, str]) -> bool:
-    if "Ship to" not in details:
-        return False
-    if "Anywhere" == details["Ship to"] or "Australia" == details["Ship to"]:
+def check_if_seen(guid: str, db_cursor: sqlite3.Cursor) -> bool:
+    db_cursor.execute("SELECT * FROM seen WHERE id = ?", (guid,))
+    if db_cursor.fetchone():
         return True
     return False
 
@@ -41,7 +42,7 @@ def parse_details(url: str) -> Mapping[str, str]:
     unparsed_info = list(soup.find_all(class_="pairsRows secondaryContent")[0].stripped_strings)
     return dict(zip([x.rstrip(':') for x in unparsed_info[::2]], unparsed_info[1::2]))
 
-def parse_feed() -> List[Listing]:
+def parse_feed(db_cursor: sqlite3.Cursor) -> List[Listing]:
     feed = feedparser.parse(RSS_URL)
     listings = []
 
@@ -51,11 +52,13 @@ def parse_feed() -> List[Listing]:
     id_regex = re.compile(".*\.(\d+)/$")
 
     for item in feed["items"]:
-        details = parse_details(item["link"])
-        if not check_ship_australia_or_worldwide(details):
+        listing_guid = id_regex.match(item["guid"]).group(1)
+        if check_if_seen(listing_guid, db_cursor):
             continue
-        listing = Listing(item["title"], id_regex.match(item["guid"]).group(1),
-                          '{} {}'.format(details["Price"], details["Currency"]), item["link"])
+        details = parse_details(item["link"])
+        listing = Listing(item["title"], listing_guid,
+                          '{} {}'.format(details["Price"], details["Currency"]), item["link"],
+                                         details["Ship to"])
         listings.append(listing)
 
     return listings
