@@ -11,17 +11,19 @@ from bs4 import BeautifulSoup
 RSS_URL = "https://www.head-fi.org/forums/headphones-for-sale-trade.6550/index.rss"
 
 class Listing:
-    def __init__(self, title: str, guid: str, price: str, link: str):
+    def __init__(self, title: str, guid: str, price: str, link: str, ships_to: str):
         self.title = title
         self.guid = guid
         self.price = price
         self.link = link
+        self.ships_to = ships_to
 
     def __getattr__(self, name: str) -> str: ...
 
     def __repr__(self) -> str:
-        return 'Title: {}\nID: {}\nPrice: {}\nLink: {}'.format(self.title, self.guid,
-                                                               self.price, self.link)
+        return 'Title: {}\nID: {}\nPrice: {}\nLink: {}\nShips to: {}'.format(self.title, self.guid,
+                                                                             self.price, self.link,
+                                                                             self.ships_to)
 
 def check_ship_australia_or_worldwide(details: Mapping[str, str]) -> bool:
     if "Ship to" not in details:
