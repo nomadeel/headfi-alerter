@@ -1,6 +1,8 @@
+from typing import List
 import sqlite3
 import os
 import sys
+from parser.parser import *
 
 DATABASE_FILE = "database.db"
 
@@ -21,6 +23,6 @@ def connect_to_database() -> sqlite3.Connection:
         return create_database()
     return sqlite3.connect(DATABASE_FILE)
 
-def add_entries(db_cursor: sqlite3.Cursor, listings):
+def add_entries(db_cursor: sqlite3.Cursor, listings: List[Listing]):
     for listing in listings:
         db_cursor.execute("INSERT INTO seen VALUES (?)", (int(listing.guid),))
