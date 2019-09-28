@@ -7,8 +7,6 @@ import urllib
 import sys
 import sqlite3
 from bs4 import BeautifulSoup
-from record.record import *
-#from test.test import test
 
 RSS_URL = "https://www.head-fi.org/forums/headphones-for-sale-trade.6550/index.rss"
 
